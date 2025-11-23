@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, UploadedFile, UseInterceptors, Inject } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ContactsService } from './contacts.service';
@@ -8,12 +8,12 @@ import { Readable } from 'stream';
 @Controller('contacts')
 @UseGuards(JwtAuthGuard)
 export class ContactsController {
-  constructor(contactsService) {
+  constructor(@Inject(ContactsService) contactsService) {
     this.contactsService = contactsService;
   }
 
   @Post()
-  async create(body) {
+  async create(@Body() body) {
     return this.contactsService.create(body);
   }
 
@@ -23,23 +23,23 @@ export class ContactsController {
   }
 
   @Get(':id')
-  async findOne(id) {
+  async findOne(@Param('id') id) {
     return this.contactsService.findOne(id);
   }
 
   @Put(':id')
-  async update(id, body) {
+  async update(@Param('id') id, @Body() body) {
     return this.contactsService.update(id, body);
   }
 
   @Delete(':id')
-  async delete(id) {
+  async delete(@Param('id') id) {
     return this.contactsService.delete(id);
   }
 
   @Post('import')
   @UseInterceptors(FileInterceptor('file'))
-  async importCsv(file) {
+  async importCsv(@UploadedFile() file) {
     const contacts = [];
     const stream = Readable.from(file.buffer);
 

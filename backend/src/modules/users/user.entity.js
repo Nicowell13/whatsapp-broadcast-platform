@@ -6,16 +6,16 @@ export class User {
   @PrimaryGeneratedColumn('uuid')
   id;
 
-  @Column({ unique: true })
+  @Column({ type: 'varchar', unique: true, length: 255 })
   email;
 
-  @Column()
+  @Column({ type: 'varchar', length: 255 })
   password;
 
-  @Column()
+  @Column({ type: 'varchar', length: 255 })
   name;
 
-  @Column({ default: true })
+  @Column({ type: 'boolean', default: true })
   isActive;
 
   @CreateDateColumn()

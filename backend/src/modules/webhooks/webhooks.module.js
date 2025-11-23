@@ -1,10 +1,11 @@
-import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { Message } from '../messages/message.entity';
-import { WebhooksController } from './webhooks.controller';
-import { WebhooksService } from './webhooks.service';
-import { MessagesModule } from '../messages/messages.module';
-import { CampaignsModule } from '../campaigns/campaigns.module';
+const { Module } = require('@nestjs/common');
+const { TypeOrmModule } = require('@nestjs/typeorm');
+
+const { Message } = require('../messages/message.entity');
+const { WebhooksController } = require('./webhooks.controller');
+const { WebhooksService } = require('./webhooks.service');
+const { MessagesModule } = require('../messages/messages.module');
+const { CampaignsModule } = require('../campaigns/campaigns.module');
 
 @Module({
   imports: [
@@ -15,4 +16,6 @@ import { CampaignsModule } from '../campaigns/campaigns.module';
   controllers: [WebhooksController],
   providers: [WebhooksService],
 })
-export class WebhooksModule {}
+class WebhooksModule {}
+
+module.exports = { WebhooksModule };

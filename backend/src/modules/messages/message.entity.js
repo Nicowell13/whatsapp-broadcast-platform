@@ -6,19 +6,19 @@ export class Message {
   @PrimaryGeneratedColumn('uuid')
   id;
 
-  @Column()
+  @Column({ type: 'varchar', length: 30 })
   recipientPhone;
 
-  @Column()
+  @Column({ type: 'varchar', length: 255 })
   recipientName;
 
   @Column('text')
   content;
 
-  @Column({ default: 'pending' }) // pending, queued, sent, delivered, failed
+  @Column({ type: 'varchar', length: 20, default: 'pending' })
   status;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   wahaMessageId;
 
   @Column('text', { nullable: true })

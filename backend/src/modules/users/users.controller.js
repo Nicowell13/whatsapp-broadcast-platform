@@ -10,7 +10,7 @@ export class UsersController {
 
   @UseGuards(JwtAuthGuard)
   @Get('profile')
-  async getProfile(req) {
+  async getProfile(@Request() req) {
     const user = await this.usersService.findById(req.user.userId);
     const { password, ...result } = user;
     return result;
@@ -24,7 +24,7 @@ export class UsersController {
 
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  async deleteUser(id) {
+  async deleteUser(@Param('id') id) {
     return this.usersService.deleteUser(id);
   }
 }

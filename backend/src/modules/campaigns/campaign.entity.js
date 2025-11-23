@@ -7,38 +7,38 @@ export class Campaign {
   @PrimaryGeneratedColumn('uuid')
   id;
 
-  @Column()
+  @Column({ type: 'varchar', length: 255 })
   name;
 
   @Column('text', { nullable: true })
   message;
 
-  @Column({ default: 'draft' }) // draft, scheduled, sending, completed, failed
-  status;
+  @Column({ type: 'varchar', length: 20, default: 'draft' })
+  status; 
 
   @Column({ type: 'timestamp', nullable: true })
   scheduledAt;
 
-  @Column({ default: 0 })
+  @Column({ type: 'int', default: 0 })
   totalRecipients;
 
-  @Column({ default: 0 })
+  @Column({ type: 'int', default: 0 })
   sentCount;
 
-  @Column({ default: 0 })
+  @Column({ type: 'int', default: 0 })
   failedCount;
 
-  @Column({ default: 0 })
+  @Column({ type: 'int', default: 0 })
   deliveredCount;
 
-  @Column({ nullable: true })
-  sessionId; // WAHA session ID
+  @Column({ type: 'varchar', nullable: true })
+  sessionId;
 
-  @Column({ nullable: true })
-  imageUrl; // URL gambar untuk broadcast
+  @Column({ type: 'varchar', nullable: true })
+  imageUrl;
 
   @Column('simple-json', { nullable: true })
-  buttons; // Array buttons [{ text: 'Text', url: 'https://...' }]
+  buttons;
 
   @CreateDateColumn()
   createdAt;

@@ -1,14 +1,17 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, Inject } from '@nestjs/common';
 import { WebhooksService } from './webhooks.service';
 
 @Controller('webhooks')
 export class WebhooksController {
-  constructor(webhooksService) {
+  constructor(
+    @Inject(WebhooksService)
+    webhooksService,
+  ) {
     this.webhooksService = webhooksService;
   }
 
   @Post('waha')
-  async handleWaha(body) {
+  async handleWaha(@Body() body) {
     return this.webhooksService.handleWahaWebhook(body);
   }
 }

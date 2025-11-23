@@ -15,27 +15,27 @@ export class WahaController {
   }
 
   @Post('sessions')
-  async createSession(body) {
+  async createSession(@Body() body) {
     return this.wahaService.createSession(body.sessionName);
   }
 
   @Get('sessions/:name/qr')
-  async getQR(name) {
+  async getQR(@Param('name') name) {
     return this.wahaService.getSessionQR(name);
   }
 
   @Get('sessions/:name/status')
-  async getStatus(name) {
+  async getStatus(@Param('name') name) {
     return this.wahaService.getSessionStatus(name);
   }
 
   @Delete('sessions/:name')
-  async deleteSession(name) {
+  async deleteSession(@Param('name') name) {
     return this.wahaService.deleteSession(name);
   }
 
   @Post('sessions/:name/logout')
-  async logout(name) {
+  async logout(@Param('name') name) {
     return this.wahaService.logoutSession(name);
   }
 }

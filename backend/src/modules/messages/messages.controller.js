@@ -10,7 +10,7 @@ export class MessagesController {
   }
 
   @Get()
-  async findAll(query) {
+  async findAll(@Query() query) {
     return this.messagesService.findAll(query);
   }
 
@@ -20,7 +20,7 @@ export class MessagesController {
   }
 
   @Get(':id')
-  async findOne(id) {
+  async findOne(@Param('id') id) {
     return this.messagesService.findOne(id);
   }
 

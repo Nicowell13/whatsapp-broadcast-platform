@@ -1,53 +1,33 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Delete,
-  Param,
-  Body,
-  UseGuards,
-  BadRequestException,
-} from '@nestjs/common';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+// waha.controller.ts FINAL
+import { Controller, Get, Post, Delete } from '@nestjs/common';
 import { WahaService } from './waha.service';
 
 @Controller('waha')
-@UseGuards(JwtAuthGuard)
 export class WahaController {
   constructor(private readonly wahaService: WahaService) {}
 
-  @Get('sessions')
-  async getSessions(): Promise<any> {
-    return this.wahaService.getSessions();
-  }
-
   @Post('sessions')
-  async createSession(@Body() body: any): Promise<any> {
-    const sessionName = body.sessionName || body.name || 'default';
-    if (!sessionName) {
-      throw new BadRequestException('sessionName is required');
-    }
-    return this.wahaService.createSession(sessionName);
+  async createSession() {
+    return this.wahaService.createSession();
   }
 
-  @Get('sessions/:name/qr')
-  async getQR(): Promise<any> {
-    // tetap QR default
-    return this.wahaService.getSessionQR();
+  @Post('sessions/start')
+  async startSession() {
+    return this.wahaService.startSession();
   }
 
-  @Get('sessions/:name/status')
-  async getStatus(@Param('name') name: string): Promise<any> {
-    return this.wahaService.getSessionStatus(name);
+  @Delete('sessions')
+  async deleteSession() {
+    return this.wahaService.deleteSession();
   }
 
-  @Delete('sessions/:name')
-  async deleteSession(@Param('name') name: string): Promise<any> {
-    return this.wahaService.deleteSession(name);
+  @Get('sessions/status')
+  async getStatus() {
+    return this.wahaService.getStatus();
   }
 
-  @Post('sessions/:name/logout')
-  async logout(@Param('name') name: string): Promise<any> {
-    return this.wahaService.logoutSession(name);
+  @Get('sessions/qr')
+  async getQR() {
+    return this.wahaService.getQR();
   }
 }

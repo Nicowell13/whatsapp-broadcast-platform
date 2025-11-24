@@ -46,7 +46,7 @@ export default function Sessions() {
   const [qrImg, setQrImg] = useState(null);
 
   // --- START SESSION ---
-  const createMutation = useMutation(wahaAPI.createSession, {
+  const createMutation = useMutation(wahaAPI.startSessionDefault, {
     onSuccess: () => {
       toast.success('Default session started!');
       setIsStarting(false);
@@ -55,7 +55,7 @@ export default function Sessions() {
       const message =
         error.response?.data?.message ||
         error.message ||
-        'Failed to create session';
+        'Failed to start session';
       toast.error(message);
       setIsStarting(false);
     },
@@ -64,7 +64,7 @@ export default function Sessions() {
   const handleStartDefault = () => {
     if (isStarting) return;
     setIsStarting(true);
-    createMutation.mutate('default');
+    createMutation.mutate();
   };
 
   // --- SHOW QR ---

@@ -7,29 +7,40 @@ export class WahaService {
     this.wahaApiUrl = process.env.WAHA_API_URL || 'http://localhost:3000';
     this.wahaApiKey = process.env.WAHA_API_KEY || '';
     
-    // Create axios instance with default config
-    // Only add Authorization header if API key is set and not empty
+    this.axiosInstance = axios.create({ 
+      baseURL: this.wahaApiUrl,
+    });
+
+    // Debug log (will appear in backend container logs)
+    console.log('[WAHA] Service initialized', {
+      baseURL: this.wahaApiUrl,
+      hasApiKey: !!this.wahaApiKey,
+      apiKeyValue: this.wahaApiKey ? `${this.wahaApiKey.substring(0, 10)}...` : 'none',
+    });
+  }
+
+  // Helper to get headers with API key
+  getHeaders() {
     const headers = {};
     if (this.wahaApiKey?.trim()) {
       headers['X-Api-Key'] = this.wahaApiKey;
-      headers['Authorization'] = `Bearer ${this.wahaApiKey}`; // fallback
     }
-    this.axiosInstance = axios.create({ baseURL: this.wahaApiUrl, headers });
-
-    // Debug log (will appear in backend container logs)
-    console.log('[WAHA] Axios instance created', {
-      baseURL: this.wahaApiUrl,
-      hasApiKey: !!this.wahaApiKey,
-      headers: Object.keys(headers),
-    });
+    return headers;
   }
 
   async getSessions() {
     try {
-      const response = await this.axiosInstance.get('/api/sessions');
+      console.log('[WAHA] Getting sessions with headers:', this.getHeaders());
+      const response = await this.axiosInstance.get('/api/sessions', {
+        headers: this.getHeaders(),
+      });
+      console.log('[WAHA] Sessions retrieved:', response.data?.length || 0, 'sessions');
       return response.data;
     } catch (error) {
-      throw new HttpException(error.message, error.response?.status || 500);
+      const status = error.response?.status || 500;
+      const data = error.response?.data;
+      console.error('[WAHA] getSessions error', { status, data, message: error.message });
+      throw new HttpException(data?.message || error.message, status);
     }
   }
 
@@ -49,9 +60,7 @@ export class WahaService {
       };
       console.log('[WAHA] Creating session:', sessionName);
       const response = await this.axiosInstance.post('/api/sessions', payload, {
-        headers: this.wahaApiKey?.trim()
-          ? { 'X-Api-Key': this.wahaApiKey, 'Authorization': `Bearer ${this.wahaApiKey}` }
-          : {},
+        headers: this.getHeaders(),
       });
       console.log('[WAHA] Session created successfully:', sessionName);
       return response.data;
@@ -81,10 +90,14 @@ export class WahaService {
     try {
       const response = await this.axiosInstance.get(
         `/api/sessions/${sessionName}/auth/qr`,
+        { headers: this.getHeaders() }
       );
       return response.data;
     } catch (error) {
-      throw new HttpException(error.message, error.response?.status || 500);
+      const status = error.response?.status || 500;
+      const data = error.response?.data;
+      console.error('[WAHA] getSessionQR error', { sessionName, status, data });
+      throw new HttpException(data?.message || error.message, status);
     }
   }
 
@@ -92,10 +105,13 @@ export class WahaService {
     try {
       const response = await this.axiosInstance.get(
         `/api/sessions/${sessionName}/status`,
+        { headers: this.getHeaders() }
       );
       return response.data;
     } catch (error) {
-      throw new HttpException(error.message, error.response?.status || 500);
+      const status = error.response?.status || 500;
+      const data = error.response?.data;
+      throw new HttpException(data?.message || error.message, status);
     }
   }
 
@@ -108,10 +124,13 @@ export class WahaService {
           chatId: `${phone}@c.us`,
           text: text,
         },
+        { headers: this.getHeaders() }
       );
       return response.data;
     } catch (error) {
-      throw new HttpException(error.message, error.response?.status || 500);
+      const status = error.response?.status || 500;
+      const data = error.response?.data;
+      throw new HttpException(data?.message || error.message, status);
     }
   }
 
@@ -127,10 +146,13 @@ export class WahaService {
           },
           caption: caption,
         },
+        { headers: this.getHeaders() }
       );
       return response.data;
     } catch (error) {
-      throw new HttpException(error.message, error.response?.status || 500);
+      const status = error.response?.status || 500;
+      const data = error.response?.data;
+      throw new HttpException(data?.message || error.message, status);
     }
   }
 
@@ -152,10 +174,13 @@ export class WahaService {
           image: imageUrl ? { url: imageUrl } : null,
           buttons: formattedButtons,
         },
+        { headers: this.getHeaders() }
       );
       return response.data;
     } catch (error) {
-      throw new HttpException(error.message, error.response?.status || 500);
+      const status = error.response?.status || 500;
+      const data = error.response?.data;
+      throw new HttpException(data?.message || error.message, status);
     }
   }
 
@@ -163,10 +188,13 @@ export class WahaService {
     try {
       const response = await this.axiosInstance.delete(
         `/api/sessions/${sessionName}`,
+        { headers: this.getHeaders() }
       );
       return response.data;
     } catch (error) {
-      throw new HttpException(error.message, error.response?.status || 500);
+      const status = error.response?.status || 500;
+      const data = error.response?.data;
+      throw new HttpException(data?.message || error.message, status);
     }
   }
 
@@ -174,10 +202,14 @@ export class WahaService {
     try {
       const response = await this.axiosInstance.post(
         `/api/sessions/${sessionName}/logout`,
+        {},
+        { headers: this.getHeaders() }
       );
       return response.data;
     } catch (error) {
-      throw new HttpException(error.message, error.response?.status || 500);
+      const status = error.response?.status || 500;
+      const data = error.response?.data;
+      throw new HttpException(data?.message || error.message, status);
     }
   }
 }

@@ -2,7 +2,7 @@ import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, UploadedFil
 import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ContactsService } from './contacts.service';
-import * as csvParser from 'csv-parser';
+import csvParser from 'csv-parser';
 import { Readable } from 'stream';
 
 @Controller('contacts')
@@ -45,26 +45,52 @@ export class ContactsController {
     }
 
     const contacts = [];
+    const errors = [];
+    let rowNumber = 1; // Start from 1 (header is row 0)
     const stream = Readable.from(file.buffer);
 
     return new Promise((resolve, reject) => {
       stream
         .pipe(csvParser())
         .on('data', (row) => {
-          // Skip empty rows
-          if (!row.name && !row.phone) return;
+          rowNumber++;
+          
+          // Get values with case-insensitive fallback
+          const name = (row.name || row.Name || '').trim();
+          const phone = (row.phone || row.Phone || '').trim();
+          const email = (row.email || row.Email || '').trim();
+          
+          // Validate required fields
+          if (!name || !phone) {
+            errors.push(`Row ${rowNumber}: Missing name or phone (name: "${name}", phone: "${phone}")`);
+            return;
+          }
+          
+          // Validate phone format (must start with 62 and be numeric)
+          if (!/^62\d{9,13}$/.test(phone)) {
+            errors.push(`Row ${rowNumber}: Invalid phone format "${phone}" (must be 62xxx without + or spaces)`);
+            return;
+          }
           
           contacts.push({
-            name: row.name || row.Name,
-            phone: row.phone || row.Phone,
-            email: row.email || row.Email || null,
+            name: name,
+            phone: phone,
+            email: email || null,
             userId: req.user.userId,
           });
         })
         .on('end', async () => {
           try {
+            if (contacts.length === 0) {
+              return reject(new Error(`No valid contacts to import. Errors: ${errors.join('; ')}`));
+            }
+            
             const result = await this.contactsService.bulkCreate(contacts);
-            resolve({ success: true, imported: result.length });
+            resolve({ 
+              success: true, 
+              imported: result.length,
+              errors: errors.length > 0 ? errors : undefined
+            });
           } catch (error) {
             reject(error);
           }

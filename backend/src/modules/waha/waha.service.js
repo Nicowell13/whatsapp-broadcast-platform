@@ -84,17 +84,20 @@ export class WahaService {
     }
   }
 
-  async getSessionQR(sessionName) {
+  async getSessionQR() {
     try {
-      const response = await this.axiosInstance.get(
-        `/api/sessions/${sessionName}/auth/qr`,
-        { headers: this.getHeaders() }
-      );
-      return response.data;
+      // WAHA Free: GET /api/screenshot returns QR as image/png (base64 or buffer)
+      const response = await this.axiosInstance.get('/api/screenshot', {
+        headers: this.getHeaders(),
+        responseType: 'arraybuffer',
+      });
+      // Convert buffer to base64 data URL for frontend
+      const base64 = Buffer.from(response.data, 'binary').toString('base64');
+      return { qr: `data:image/png;base64,${base64}` };
     } catch (error) {
       const status = error.response?.status || 500;
       const data = error.response?.data;
-      console.error('[WAHA] getSessionQR error', { sessionName, status, data });
+      console.error('[WAHA] getSessionQR error', { status, data });
       throw new HttpException(data?.message || error.message, status);
     }
   }

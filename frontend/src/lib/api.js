@@ -62,7 +62,7 @@ export const wahaAPI = {
   getSessions: () => api.get('/waha/sessions'),
   // If sessionName is empty, backend will use 'default'
   createSession: (sessionName) => api.post('/waha/sessions', { name: sessionName || 'default' }),
-  getQR: (sessionName = 'default') => api.get(`/waha/sessions/${sessionName}/qr`),
+  getQR: () => api.get('/waha/sessions/default/qr'),
   getStatus: (sessionName = 'default') => api.get(`/waha/sessions/${sessionName}/status`),
   deleteSession: (sessionName = 'default') => api.delete(`/waha/sessions/${sessionName}`),
 };

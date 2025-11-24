@@ -22,8 +22,9 @@ export class WahaController {
   }
 
   @Get('sessions/:name/qr')
-  async getQR(@Param('name') name) {
-    return this.wahaService.getSessionQR(name);
+  async getQR() {
+    // Ignore session name, always return screenshot
+    return this.wahaService.getSessionQR();
   }
 
   @Get('sessions/:name/status')

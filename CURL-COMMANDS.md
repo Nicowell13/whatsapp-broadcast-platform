@@ -10,6 +10,44 @@ Sistem menggunakan **JWT (JSON Web Token)** untuk autentikasi. Setiap request ke
 
 ---
 
+## Quick Setup & Restart
+
+### Menggunakan Script Helper (Recommended)
+
+Saya sudah membuat script helper untuk memudahkan restart dan check status:
+
+**1. Restart semua services dengan urutan yang benar:**
+```bash
+# Make script executable
+chmod +x restart-services.sh check-status.sh
+
+# Run restart script
+./restart-services.sh
+```
+
+**2. Check status semua services:**
+```bash
+./check-status.sh
+```
+
+### Manual Restart (Jika script tidak bisa digunakan)
+
+```bash
+# Stop semua services
+docker-compose down
+
+# Start dengan urutan yang benar
+docker-compose up -d postgres
+sleep 10  # Tunggu database ready
+docker-compose up -d redis waha
+docker-compose up -d backend worker frontend
+
+# Monitor logs
+docker-compose logs -f backend
+```
+
+---
+
 ## 1. Menambah User Baru (Register)
 
 ```bash
@@ -256,27 +294,34 @@ Kemungkinan penyebab:
 1. **Database belum siap atau tidak terkoneksi**
 2. **Environment variables tidak terset**
 3. **Tabel database belum dibuat**
+4. **Body parser tidak terkonfigurasi (sudah diperbaiki di code)**
 
 **Solusi:**
 
 ```bash
-# 1. Cek log backend untuk melihat error detail
-docker logs wa_backend -n 100
+# 1. Cek status semua container
+docker ps -a
 
-# 2. Cek koneksi database
+# 2. Pastikan PostgreSQL sudah running
+docker logs wa_postgres_c1 -n 50
+
+# 3. Jika PostgreSQL belum ready, tunggu atau restart
+docker restart wa_postgres_c1
+docker logs wa_postgres_c1 -f  # Tunggu sampai "database system is ready to accept connections"
+
+# 4. Setelah database ready, rebuild dan restart backend
+cd /path/to/whatsapp-broadcast-platform
+docker-compose build backend
+docker-compose up -d backend
+
+# 5. Cek log backend untuk memastikan tidak ada error
+docker logs wa_backend_c1 -f
+
+# 6. Cek koneksi database dari dalam container
 docker exec -it wa_postgres_c1 psql -U wa_admin -d whatsapp_broadcast -c "\dt"
 
-# 3. Cek environment variables
-docker exec wa_backend env | grep DATABASE
-
-# 4. Restart backend container jika perlu
-docker restart wa_backend
-
-# 5. Cek status semua container
-docker ps
-
-# 6. Jika database kosong, jalankan migrations atau restart dengan synchronize
-docker-compose restart backend
+# 7. Cek environment variables
+docker exec wa_backend_c1 env | grep DATABASE
 ```
 
 **Verifikasi database sudah ada:**
@@ -289,6 +334,23 @@ docker exec -it wa_postgres_c1 psql -U wa_admin -d whatsapp_broadcast -c "SELECT
 - campaigns
 - contacts
 - messages
+
+**Jika database connection refused:**
+```bash
+# Cek apakah postgres container running
+docker ps | grep postgres
+
+# Restart semua services dalam urutan yang benar
+docker-compose down
+docker-compose up -d postgres
+# Tunggu 10 detik untuk database ready
+sleep 10
+docker-compose up -d redis waha
+docker-compose up -d backend worker frontend
+
+# Monitor logs
+docker-compose logs -f backend
+```
 
 **Jika ada perubahan kode, rebuild backend:**
 ```bash

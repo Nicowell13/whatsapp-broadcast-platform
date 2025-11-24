@@ -38,7 +38,7 @@ services:
 
   # WAHA API Container
   waha:
-    image: devlikeapro/waha-core:latest
+    image: devlikeapro/waha:latest
     container_name: wa_waha_c1
     restart: unless-stopped
     environment:
@@ -46,6 +46,9 @@ services:
       WAHA_PRINT_QR: "True"
       WHATSAPP_API_PORT: "3000"
       WHATSAPP_API_HOSTNAME: "0.0.0.0"
+      
+      # Security - Set a simple API key
+      WHATSAPP_API_KEY: "waha-secret-key-2024"
       
       # Session configuration
       WHATSAPP_RESTART_ALL_SESSIONS: "False"
@@ -90,7 +93,7 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
       WAHA_API_URL: http://waha:3000
-      WAHA_API_KEY: ${WAHA_API_KEY:-}
+      WAHA_API_KEY: "waha-secret-key-2024"
       JWT_SECRET: ${JWT_SECRET}
       FRONTEND_URL: ${FRONTEND_URL}
     depends_on:
@@ -126,7 +129,7 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
       WAHA_API_URL: http://waha:3000
-      WAHA_API_KEY: ${WAHA_API_KEY:-}
+      WAHA_API_KEY: "waha-secret-key-2024"
       MESSAGE_PACING_MIN: ${MESSAGE_PACING_MIN:-2000}
       MESSAGE_PACING_MAX: ${MESSAGE_PACING_MAX:-4000}
       WORKER_CONCURRENCY: ${WORKER_CONCURRENCY:-1}

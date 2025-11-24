@@ -41,25 +41,27 @@ services:
     image: devlikeapro/waha:latest
     container_name: wa_waha_c1
     restart: unless-stopped
+    ports:
+      - "3000:3000"
     environment:
-      # WAHA Configuration
       WAHA_PRINT_QR: "True"
       WHATSAPP_API_PORT: "3000"
       WHATSAPP_API_HOSTNAME: "0.0.0.0"
-      
-      # Security - Set a simple API key
+
+      # API key – samakan dengan yang dipakai backend
       WHATSAPP_API_KEY: "waha-secret-key-2024"
-      
-      # Session configuration
-      WHATSAPP_RESTART_ALL_SESSIONS: "False"
-      
-      # Engine (WEBJS recommended)
-      WHATSAPP_DEFAULT_ENGINE: "NOWEB"
-      
-      # Webhook configuration
+
+      # Session configuration – seperti project lama
+      WHATSAPP_RESTART_ALL_SESSIONS: "True"
+      WHATSAPP_START_SESSIONS: "default"
+
+      # Engine – WEBJS seperti setup lama
+      WHATSAPP_DEFAULT_ENGINE: "WEBJS"
+
+      # Webhook (opsional, biarkan seperti di repo ini)
       WHATSAPP_HOOK_EVENTS: "message,message.any,state.change,session.status"
       WHATSAPP_HOOK_URL: "http://backend:3000/api/webhooks/waha"
-      
+
       # Files & Media
       WHATSAPP_FILES_FOLDER: "/app/files"
       WHATSAPP_FILES_LIFETIME: "180"
@@ -68,12 +70,6 @@ services:
       - waha_files:/app/files
     networks:
       - wa_network
-    deploy:
-      resources:
-        limits:
-          memory: 1G
-        reservations:
-          memory: 512M
 
   # NestJS Backend
   backend:

@@ -31,25 +31,27 @@ export default function Sessions() {
   const [qrImg, setQrImg] = useState(null);
 
   const createMutation = useMutation(async () => {
-    await wahaAPI.createDefault();
-    return await wahaAPI.startDefault();
-  }, {
-    onSuccess: () => {
-      toast.success('Default session started!');
-      setIsStarting(false);
-    },
-    onError: (error) => {
-      const message = error.response?.data?.message || error.message || 'Failed to start session';
-      toast.error(message);
-      setIsStarting(false);
-    },
-  });
+  // Buat session default
+  await wahaAPI.createSession('default');
 
-  const handleStart = () => {
-    if (isStarting) return;
-    setIsStarting(true);
-    createMutation.mutate();
-  };
+  // Start session default
+  return await wahaAPI.start();
+}, {
+  onSuccess: () => {
+    toast.success('Default session started!');
+    setIsStarting(false);
+  },
+  onError: (error) => {
+    const message = error.response?.data?.message || error.message || 'Failed to start session';
+    toast.error(message);
+    setIsStarting(false);
+  },
+});
+
+const handleStart = () => {
+  createMutation.mutate();
+};
+
 
   const handleQR = async () => {
     setQrImg(null);

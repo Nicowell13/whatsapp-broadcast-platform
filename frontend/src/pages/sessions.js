@@ -22,6 +22,10 @@ export default function Sessions() {
       setShowModal(false);
       setSessionName('');
     },
+    onError: (error) => {
+      const message = error.response?.data?.message || error.message || 'Failed to create session';
+      toast.error(message);
+    },
   });
 
   const deleteMutation = useMutation(wahaAPI.deleteSession, {

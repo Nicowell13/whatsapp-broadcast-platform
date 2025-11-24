@@ -47,16 +47,32 @@ export class WahaService {
           },
         },
       };
+      console.log('[WAHA] Creating session:', sessionName);
       const response = await this.axiosInstance.post('/api/sessions', payload, {
         headers: this.wahaApiKey?.trim()
           ? { 'X-Api-Key': this.wahaApiKey, 'Authorization': `Bearer ${this.wahaApiKey}` }
           : {},
       });
+      console.log('[WAHA] Session created successfully:', sessionName);
       return response.data;
     } catch (error) {
       const status = error.response?.status || 500;
       const data = error.response?.data;
-      console.error('[WAHA] createSession error', { status, data, message: error.message });
+      console.error('[WAHA] createSession error', { 
+        sessionName, 
+        status, 
+        data, 
+        message: error.message 
+      });
+      
+      // If session already exists (422), provide helpful message
+      if (status === 422 && data?.message?.includes('already exists')) {
+        throw new HttpException(
+          `Session '${sessionName}' already exists. Please delete it first or use a different name.`,
+          status
+        );
+      }
+      
       throw new HttpException(data?.message || error.message, status);
     }
   }

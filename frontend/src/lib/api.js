@@ -59,7 +59,7 @@ export const messagesAPI = {
 // WAHA API
 export const wahaAPI = {
   getSessions: () => api.get('/waha/sessions'),
-  createSession: (sessionName) => api.post('/waha/sessions', { sessionName }),
+  createSession: (sessionName) => api.post('/waha/sessions', { name: sessionName }),
   getQR: (sessionName) => api.get(`/waha/sessions/${sessionName}/qr`),
   getStatus: (sessionName) => api.get(`/waha/sessions/${sessionName}/status`),
   deleteSession: (sessionName) => api.delete(`/waha/sessions/${sessionName}`),

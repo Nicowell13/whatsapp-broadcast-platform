@@ -11,12 +11,20 @@ export default function Sessions() {
   const [sessionName, setSessionName] = useState('');
   const [qrCode, setQrCode] = useState(null);
 
-  const { data: sessions, isLoading, error } = useQuery('waha-sessions', wahaAPI.getSessions, {
+  const { data: sessionsResponse, isLoading, error } = useQuery('waha-sessions', wahaAPI.getSessions, {
     refetchInterval: 5000, // Auto refresh every 5s
     onSuccess: (data) => {
-      console.log('Sessions data:', data);
+      console.log('Sessions response:', data);
+      console.log('Type:', typeof data);
+      console.log('Is array?', Array.isArray(data));
+      console.log('Has data property?', data?.data);
     },
   });
+
+  // Handle both response formats: direct array or wrapped in data property
+  const sessions = Array.isArray(sessionsResponse) 
+    ? sessionsResponse 
+    : (Array.isArray(sessionsResponse?.data) ? sessionsResponse.data : []);
 
   const createMutation = useMutation(wahaAPI.createSession, {
     onSuccess: () => {
@@ -86,13 +94,13 @@ export default function Sessions() {
             </div>
           )}
           
-          {!isLoading && !error && Array.isArray(sessions?.data) && sessions.data.length === 0 && (
+          {!isLoading && !error && sessions.length === 0 && (
             <div className="col-span-full text-center py-8 text-gray-500">
               No sessions found. Create a new session to get started.
             </div>
           )}
           
-          {Array.isArray(sessions?.data) && sessions.data.map((session) => (
+          {sessions.map((session) => (
             <div key={session.name} className="bg-white rounded-lg shadow p-6">
               <div className="flex justify-between items-start mb-4">
                 <h3 className="text-lg font-semibold text-gray-900">{session.name}</h3>

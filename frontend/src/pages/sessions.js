@@ -11,8 +11,11 @@ export default function Sessions() {
   const [sessionName, setSessionName] = useState('');
   const [qrCode, setQrCode] = useState(null);
 
-  const { data: sessions, isLoading } = useQuery('waha-sessions', wahaAPI.getSessions, {
+  const { data: sessions, isLoading, error } = useQuery('waha-sessions', wahaAPI.getSessions, {
     refetchInterval: 5000, // Auto refresh every 5s
+    onSuccess: (data) => {
+      console.log('Sessions data:', data);
+    },
   });
 
   const createMutation = useMutation(wahaAPI.createSession, {
@@ -71,6 +74,24 @@ export default function Sessions() {
 
         {/* Session List */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {isLoading && (
+            <div className="col-span-full text-center py-8 text-gray-500">
+              Loading sessions...
+            </div>
+          )}
+          
+          {error && (
+            <div className="col-span-full text-center py-8 text-red-500">
+              Error loading sessions: {error.message}
+            </div>
+          )}
+          
+          {!isLoading && !error && (!sessions?.data || sessions.data.length === 0) && (
+            <div className="col-span-full text-center py-8 text-gray-500">
+              No sessions found. Create a new session to get started.
+            </div>
+          )}
+          
           {sessions?.data?.map((session) => (
             <div key={session.name} className="bg-white rounded-lg shadow p-6">
               <div className="flex justify-between items-start mb-4">

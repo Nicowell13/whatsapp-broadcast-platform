@@ -10,10 +10,13 @@ export class WahaService {
     // Create axios instance with default config
     // Only add Authorization header if API key is set and not empty
     const headers = {};
-if (this.wahaApiKey?.trim()) {
-  headers['X-Api-Key'] = this.wahaApiKey;
-}
-this.axiosInstance = axios.create({ baseURL: this.wahaApiUrl, headers });
+    if (this.wahaApiKey?.trim()) {
+      // Primary WAHA header
+      headers['X-Api-Key'] = this.wahaApiKey;
+      // Fallback: some WAHA versions expect Authorization Bearer
+      headers['Authorization'] = `Bearer ${this.wahaApiKey}`;
+    }
+    this.axiosInstance = axios.create({ baseURL: this.wahaApiUrl, headers });
   }
 
   async getSessions() {

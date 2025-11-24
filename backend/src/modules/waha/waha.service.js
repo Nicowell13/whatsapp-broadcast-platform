@@ -11,12 +11,17 @@ export class WahaService {
     // Only add Authorization header if API key is set and not empty
     const headers = {};
     if (this.wahaApiKey?.trim()) {
-      // Primary WAHA header
       headers['X-Api-Key'] = this.wahaApiKey;
-      // Fallback: some WAHA versions expect Authorization Bearer
-      headers['Authorization'] = `Bearer ${this.wahaApiKey}`;
+      headers['Authorization'] = `Bearer ${this.wahaApiKey}`; // fallback
     }
     this.axiosInstance = axios.create({ baseURL: this.wahaApiUrl, headers });
+
+    // Debug log (will appear in backend container logs)
+    console.log('[WAHA] Axios instance created', {
+      baseURL: this.wahaApiUrl,
+      hasApiKey: !!this.wahaApiKey,
+      headers: Object.keys(headers),
+    });
   }
 
   async getSessions() {
@@ -30,7 +35,7 @@ export class WahaService {
 
   async createSession(sessionName) {
     try {
-      const response = await this.axiosInstance.post('/api/sessions', {
+      const payload = {
         name: sessionName,
         config: {
           proxy: null,
@@ -41,10 +46,18 @@ export class WahaService {
             },
           },
         },
+      };
+      const response = await this.axiosInstance.post('/api/sessions', payload, {
+        headers: this.wahaApiKey?.trim()
+          ? { 'X-Api-Key': this.wahaApiKey, 'Authorization': `Bearer ${this.wahaApiKey}` }
+          : {},
       });
       return response.data;
     } catch (error) {
-      throw new HttpException(error.message, error.response?.status || 500);
+      const status = error.response?.status || 500;
+      const data = error.response?.data;
+      console.error('[WAHA] createSession error', { status, data, message: error.message });
+      throw new HttpException(data?.message || error.message, status);
     }
   }
 

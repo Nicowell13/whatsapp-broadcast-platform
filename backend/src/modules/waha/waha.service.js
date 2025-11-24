@@ -86,8 +86,8 @@ export class WahaService {
 
   async getSessionQR() {
     try {
-      // WAHA Free: GET /api/screenshot returns QR as image/png (base64 or buffer)
-      const response = await this.axiosInstance.get('/api/screenshot', {
+      // WAHA: GET /api/screenshot?session=default returns QR as image/png (base64 or buffer)
+      const response = await this.axiosInstance.get('/api/screenshot?session=default', {
         headers: this.getHeaders(),
         responseType: 'arraybuffer',
       });

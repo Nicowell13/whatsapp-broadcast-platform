@@ -42,8 +42,9 @@ services:
     container_name: wa_waha_c1
     restart: unless-stopped
     environment:
-      WHATSAPP_HOOK_URL: http://backend:3000/webhooks/waha
+      WHATSAPP_HOOK_URL: http://backend:3000/api/webhooks/waha
       WHATSAPP_HOOK_EVENTS: message,message.any,state.change,session.status
+      WHATSAPP_API_KEY: ${WAHA_API_KEY:-}
     volumes:
       - waha_data:/app/.sessions
     networks:
@@ -73,6 +74,7 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
       WAHA_API_URL: http://waha:3000
+      WAHA_API_KEY: ${WAHA_API_KEY:-}
       JWT_SECRET: ${JWT_SECRET}
       FRONTEND_URL: ${FRONTEND_URL}
     depends_on:
@@ -108,6 +110,7 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
       WAHA_API_URL: http://waha:3000
+      WAHA_API_KEY: ${WAHA_API_KEY:-}
       MESSAGE_PACING_MIN: ${MESSAGE_PACING_MIN:-2000}
       MESSAGE_PACING_MAX: ${MESSAGE_PACING_MAX:-4000}
       WORKER_CONCURRENCY: ${WORKER_CONCURRENCY:-1}

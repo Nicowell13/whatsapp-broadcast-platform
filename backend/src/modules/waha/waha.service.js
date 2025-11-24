@@ -5,11 +5,20 @@ import axios from 'axios';
 export class WahaService {
   constructor() {
     this.wahaApiUrl = process.env.WAHA_API_URL || 'http://localhost:3000';
+    this.wahaApiKey = process.env.WAHA_API_KEY || '';
+    
+    // Create axios instance with default config
+    this.axiosInstance = axios.create({
+      baseURL: this.wahaApiUrl,
+      headers: this.wahaApiKey ? {
+        'X-Api-Key': this.wahaApiKey,
+      } : {},
+    });
   }
 
   async getSessions() {
     try {
-      const response = await axios.get(`${this.wahaApiUrl}/api/sessions`);
+      const response = await this.axiosInstance.get('/api/sessions');
       return response.data;
     } catch (error) {
       throw new HttpException(error.message, error.response?.status || 500);
@@ -18,7 +27,7 @@ export class WahaService {
 
   async createSession(sessionName) {
     try {
-      const response = await axios.post(`${this.wahaApiUrl}/api/sessions`, {
+      const response = await this.axiosInstance.post('/api/sessions', {
         name: sessionName,
         config: {
           proxy: null,
@@ -38,8 +47,8 @@ export class WahaService {
 
   async getSessionQR(sessionName) {
     try {
-      const response = await axios.get(
-        `${this.wahaApiUrl}/api/sessions/${sessionName}/auth/qr`,
+      const response = await this.axiosInstance.get(
+        `/api/sessions/${sessionName}/auth/qr`,
       );
       return response.data;
     } catch (error) {
@@ -49,8 +58,8 @@ export class WahaService {
 
   async getSessionStatus(sessionName) {
     try {
-      const response = await axios.get(
-        `${this.wahaApiUrl}/api/sessions/${sessionName}/status`,
+      const response = await this.axiosInstance.get(
+        `/api/sessions/${sessionName}/status`,
       );
       return response.data;
     } catch (error) {
@@ -60,8 +69,8 @@ export class WahaService {
 
   async sendMessage(sessionName, phone, text) {
     try {
-      const response = await axios.post(
-        `${this.wahaApiUrl}/api/sendText`,
+      const response = await this.axiosInstance.post(
+        '/api/sendText',
         {
           session: sessionName,
           chatId: `${phone}@c.us`,
@@ -76,8 +85,8 @@ export class WahaService {
 
   async sendImage(sessionName, phone, imageUrl, caption = '') {
     try {
-      const response = await axios.post(
-        `${this.wahaApiUrl}/api/sendImage`,
+      const response = await this.axiosInstance.post(
+        '/api/sendImage',
         {
           session: sessionName,
           chatId: `${phone}@c.us`,
@@ -102,8 +111,8 @@ export class WahaService {
         url: btn.url,
       }));
 
-      const response = await axios.post(
-        `${this.wahaApiUrl}/api/sendButtons`,
+      const response = await this.axiosInstance.post(
+        '/api/sendButtons',
         {
           session: sessionName,
           chatId: `${phone}@c.us`,
@@ -120,8 +129,8 @@ export class WahaService {
 
   async deleteSession(sessionName) {
     try {
-      const response = await axios.delete(
-        `${this.wahaApiUrl}/api/sessions/${sessionName}`,
+      const response = await this.axiosInstance.delete(
+        `/api/sessions/${sessionName}`,
       );
       return response.data;
     } catch (error) {
@@ -131,8 +140,8 @@ export class WahaService {
 
   async logoutSession(sessionName) {
     try {
-      const response = await axios.post(
-        `${this.wahaApiUrl}/api/sessions/${sessionName}/logout`,
+      const response = await this.axiosInstance.post(
+        `/api/sessions/${sessionName}/logout`,
       );
       return response.data;
     } catch (error) {

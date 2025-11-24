@@ -46,19 +46,34 @@ export class ContactsController {
 
     const contacts = [];
     const errors = [];
-    let rowNumber = 1; // Start from 1 (header is row 0)
+    let rowNumber = 0;
     const stream = Readable.from(file.buffer);
 
     return new Promise((resolve, reject) => {
       stream
-        .pipe(csvParser())
+        .pipe(csvParser({
+          headers: false, // Don't use first row as header
+          skipLines: 0
+        }))
         .on('data', (row) => {
           rowNumber++;
           
-          // Get values with case-insensitive fallback
-          const name = (row.name || row.Name || '').trim();
-          const phone = (row.phone || row.Phone || '').trim();
-          const email = (row.email || row.Email || '').trim();
+          // CSV parser will create numbered columns: 0, 1, 2, etc
+          // Or if it has headers: name, phone, email
+          let name, phone, email;
+          
+          // Try to detect format
+          if (row['0'] !== undefined) {
+            // No header format - columns are numbered
+            name = (row['0'] || '').trim();
+            phone = (row['1'] || '').trim();
+            email = (row['2'] || '').trim();
+          } else {
+            // Has header format
+            name = (row.name || row.Name || '').trim();
+            phone = (row.phone || row.Phone || '').trim();
+            email = (row.email || row.Email || '').trim();
+          }
           
           // Validate required fields
           if (!name || !phone) {

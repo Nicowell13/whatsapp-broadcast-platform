@@ -8,11 +8,15 @@ export class WahaService {
     this.wahaApiKey = process.env.WAHA_API_KEY || '';
     
     // Create axios instance with default config
+    // Only add Authorization header if API key is set and not empty
+    const headers = {};
+    if (this.wahaApiKey && this.wahaApiKey.trim() !== '') {
+      headers['Authorization'] = `Bearer ${this.wahaApiKey}`;
+    }
+    
     this.axiosInstance = axios.create({
       baseURL: this.wahaApiUrl,
-      headers: this.wahaApiKey ? {
-        'X-Api-Key': this.wahaApiKey,
-      } : {},
+      headers: headers,
     });
   }
 

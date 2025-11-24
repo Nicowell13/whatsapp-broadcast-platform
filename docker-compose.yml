@@ -44,7 +44,9 @@ services:
     environment:
       WHATSAPP_HOOK_URL: http://backend:3000/api/webhooks/waha
       WHATSAPP_HOOK_EVENTS: message,message.any,state.change,session.status
-      WHATSAPP_API_KEY: ${WAHA_API_KEY:-}
+      # Disable API key requirement - set to empty string or remove
+      WHATSAPP_API_KEY: ""
+      WAHA_DASHBOARD_ENABLED: "true"
     volumes:
       - waha_data:/app/.sessions
     networks:

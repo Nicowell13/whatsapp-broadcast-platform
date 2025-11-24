@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Delete, Body, Param, UseGuards, Inject } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Body, Param, UseGuards, Inject, BadRequestException } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { WahaService } from './waha.service';
 
@@ -16,7 +16,11 @@ export class WahaController {
 
   @Post('sessions')
   async createSession(@Body() body) {
-    return this.wahaService.createSession(body.sessionName);
+    const sessionName = body.sessionName || body.name;
+    if (!sessionName) {
+      throw new BadRequestException('Provide `sessionName` or `name` in request body');
+    }
+    return this.wahaService.createSession(sessionName);
   }
 
   @Get('sessions/:name/qr')

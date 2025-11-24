@@ -86,13 +86,13 @@ export default function Sessions() {
             </div>
           )}
           
-          {!isLoading && !error && (!sessions?.data || sessions.data.length === 0) && (
+          {!isLoading && !error && Array.isArray(sessions?.data) && sessions.data.length === 0 && (
             <div className="col-span-full text-center py-8 text-gray-500">
               No sessions found. Create a new session to get started.
             </div>
           )}
           
-          {sessions?.data?.map((session) => (
+          {Array.isArray(sessions?.data) && sessions.data.map((session) => (
             <div key={session.name} className="bg-white rounded-lg shadow p-6">
               <div className="flex justify-between items-start mb-4">
                 <h3 className="text-lg font-semibold text-gray-900">{session.name}</h3>

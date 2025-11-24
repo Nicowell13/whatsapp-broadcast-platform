@@ -1,13 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Delete,
-  Param,
-  Body,
-  UseGuards,
-  BadRequestException,
-} from '@nestjs/common';
+import { Controller, Get, Post, Delete, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { WahaService } from './waha.service';
 
@@ -16,29 +7,28 @@ import { WahaService } from './waha.service';
 export class WahaController {
   constructor(private readonly wahaService: WahaService) {}
 
-  @Post('sessions')
-  async createSession(@Body() body: any) {
-    const name = body.name || 'default';
-    return this.wahaService.createSession(name);
+  // ============================================================
+  // DEFAULT SESSION ONLY
+  // ============================================================
+
+  @Post('session/start')
+  async startDefault() {
+    await this.wahaService.createDefaultSession();
+    return this.wahaService.startDefaultSession();
   }
 
-  @Post('sessions/:name/start')
-  async start(@Param('name') name: string) {
-    return this.wahaService.startSession(name);
+  @Get('session/status')
+  async getStatus() {
+    return this.wahaService.getDefaultStatus();
   }
 
-  @Get('sessions/:name/status')
-  async status(@Param('name') name: string) {
-    return this.wahaService.getSessionStatus(name);
+  @Get('session/qr')
+  async getQR() {
+    return this.wahaService.getDefaultQR();
   }
 
-  @Get('sessions/default/qr')
-  async qr() {
-    return this.wahaService.getSessionQR();
-  }
-
-  @Delete('sessions/:name')
-  async delete(@Param('name') name: string) {
-    return this.wahaService.deleteSession(name);
+  @Delete('session')
+  async deleteDefault() {
+    return this.wahaService.deleteDefaultSession();
   }
 }

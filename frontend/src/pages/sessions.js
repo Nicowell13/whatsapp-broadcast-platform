@@ -30,27 +30,20 @@ export default function Sessions() {
   const [qrModal, setQrModal] = useState(false);
   const [qrImg, setQrImg] = useState(null);
 
-  const createMutation = useMutation(async () => {
-  // Buat session default
-  await wahaAPI.createSession('default');
-
-  // Start session default
+const createMutation = useMutation(async () => {
+  await wahaAPI.createSession();
   return await wahaAPI.start();
 }, {
   onSuccess: () => {
-    toast.success('Default session started!');
+    toast.success("Default session started");
     setIsStarting(false);
   },
-  onError: (error) => {
-    const message = error.response?.data?.message || error.message || 'Failed to start session';
-    toast.error(message);
+  onError: (err) => {
+    toast.error(err.response?.data?.message || err.message);
     setIsStarting(false);
-  },
+  }
 });
 
-const handleStart = () => {
-  createMutation.mutate();
-};
 
 
   const handleQR = async () => {

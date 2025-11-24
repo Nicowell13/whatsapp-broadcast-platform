@@ -77,9 +77,10 @@ export const wahaAPI = {
   createSession: () => api.post('/waha/sessions', { name: 'default' }),
   start: () => api.post('/waha/sessions/default/start'),
   getQR: () => api.get('/waha/sessions/default/qr'),
-  delete: () => api.delete('/waha/sessions/default'),
   status: () => api.get('/waha/sessions/default/status'),
+  delete: () => api.delete('/waha/sessions/default'),
 };
+
 
 /* ======================================
    DASHBOARD API

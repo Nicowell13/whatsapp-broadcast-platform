@@ -11,40 +11,56 @@ export class WahaService {
     timeout: 20000,
   });
 
-  async createSession(sessionName: string) {
+  // ============================================================
+  // DEFAULT SESSION ONLY
+  // ============================================================
+
+  async createDefaultSession() {
     try {
-      const res = await this.client.post(`/api/sessions/${sessionName}`);
+      const res = await this.client.post(`/api/sessions/default`);
       return res.data;
     } catch (e: any) {
-      throw new HttpException(
-        e.response?.data || e.message,
-        e.response?.status || 500
-      );
+      throw new HttpException(e.response?.data || e.message, e.response?.status || 500);
     }
   }
 
-  async startSession(sessionName: string) {
+  async startDefaultSession() {
     try {
-      const res = await this.client.post(`/api/sessions/${sessionName}/start`);
+      const res = await this.client.post(`/api/sessions/default/start`);
       return res.data;
     } catch (e: any) {
-      throw new HttpException(
-        e.response?.data || e.message,
-        e.response?.status || 500
-      );
+      throw new HttpException(e.response?.data || e.message, e.response?.status || 500);
     }
   }
 
-  async getSessionStatus(name: string) {
+  async deleteDefaultSession() {
     try {
-      const res = await this.client.get(`/api/sessions/${name}/status`);
+      const res = await this.client.delete(`/api/sessions/default`);
+      return res.data;
+    } catch (e: any) {
+      throw new HttpException(e.response?.data || e.message, e.response?.status || 500);
+    }
+  }
+
+  async logoutDefault() {
+    try {
+      const res = await this.client.post(`/api/sessions/default/logout`);
+      return res.data;
+    } catch (e: any) {
+      throw new HttpException(e.response?.data || e.message, e.response?.status || 500);
+    }
+  }
+
+  async getDefaultStatus() {
+    try {
+      const res = await this.client.get(`/api/sessions/default/status`);
       return res.data;
     } catch {
-      return { state: 'disconnected' };
+      return { state: 'disconnected', error: true };
     }
   }
 
-  async getSessionQR() {
+  async getDefaultQR() {
     try {
       const res = await this.client.get(`/api/screenshot?session=default`, {
         responseType: 'text',
@@ -52,18 +68,6 @@ export class WahaService {
       return { qr: res.data };
     } catch {
       return { qr: null };
-    }
-  }
-
-  async deleteSession(name: string) {
-    try {
-      const res = await this.client.delete(`/api/sessions/${name}`);
-      return res.data;
-    } catch (e: any) {
-      throw new HttpException(
-        e.response?.data || e.message,
-        e.response?.status || 500
-      );
     }
   }
 }

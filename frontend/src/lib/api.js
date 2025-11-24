@@ -74,20 +74,11 @@ export const messagesAPI = {
    WAHA API (DEFAULT SESSION ONLY)
 ====================================== */
 export const wahaAPI = {
-  getSessions: () => api.get('/waha/sessions'),
-
-  createSession: (sessionName) =>
-    api.post('/waha/sessions', {
-      name: sessionName || 'default',
-    }),
-
+  createSession: () => api.post('/waha/sessions', { name: 'default' }),
+  start: () => api.post('/waha/sessions/default/start'),
   getQR: () => api.get('/waha/sessions/default/qr'),
-
-  getStatus: (sessionName = 'default') =>
-    api.get(`/waha/sessions/${sessionName}/status`),
-
-  deleteSession: (sessionName = 'default') =>
-    api.delete(`/waha/sessions/${sessionName}`),
+  delete: () => api.delete('/waha/sessions/default'),
+  status: () => api.get('/waha/sessions/default/status'),
 };
 
 /* ======================================

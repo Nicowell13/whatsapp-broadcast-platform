@@ -15,12 +15,10 @@ export default function Sessions() {
     refetchInterval: 5000, // Auto refresh every 5s
   });
 
-  // Backend already normalizes to an array of sessions (single default session in free mode)
+  // WAHA docs: backend returns array from GET /api/sessions
   const sessions = Array.isArray(sessionsResponse?.data)
     ? sessionsResponse.data
-    : Array.isArray(sessionsResponse)
-      ? sessionsResponse
-      : [];
+    : [];
 
   const createMutation = useMutation(wahaAPI.createSession, {
     onSuccess: () => {

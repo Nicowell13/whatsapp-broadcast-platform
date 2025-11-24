@@ -16,7 +16,7 @@ export class WahaController {
 
   @Post('sessions')
   async createSession(@Body() body) {
-    // For WAHA free, we always use a single default session
+    // If no name provided, WAHA will usually default to 'default'
     const sessionName = body.sessionName || body.name || 'default';
     return this.wahaService.createSession(sessionName);
   }

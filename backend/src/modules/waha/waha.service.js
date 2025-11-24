@@ -30,21 +30,11 @@ export class WahaService {
 
   async getSessions() {
     try {
-      // WAHA free: sessions list is not reliable and often empty.
-      // We emulate a single default session based on its status.
-      const status = await this.getSessionStatus('default').catch(() => null);
-
-      if (!status) {
-        return [];
-      }
-
-      return [
-        {
-          name: 'default',
-          status: status.state || status.status || 'UNKNOWN',
-          me: status.me || null,
-        },
-      ];
+      // Use WAHA documented endpoint: GET /api/sessions
+      const response = await this.axiosInstance.get('/api/sessions', {
+        headers: this.getHeaders(),
+      });
+      return response.data;
     } catch (error) {
       const httpStatus = error.response?.status || 500;
       const data = error.response?.data;
@@ -111,8 +101,9 @@ export class WahaService {
 
   async getSessionStatus(sessionName) {
     try {
+      // WAHA docs: GET /api/sessions/{name}
       const response = await this.axiosInstance.get(
-        `/api/sessions/${sessionName}/status`,
+        `/api/sessions/${sessionName}`,
         { headers: this.getHeaders() }
       );
       return response.data;

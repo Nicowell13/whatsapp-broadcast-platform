@@ -58,7 +58,7 @@ export const messagesAPI = {
 
 // WAHA API (single default session in free mode)
 export const wahaAPI = {
-  // Backend will emulate a single default session
+  // WAHA documented endpoints
   getSessions: () => api.get('/waha/sessions'),
   // If sessionName is empty, backend will use 'default'
   createSession: (sessionName) => api.post('/waha/sessions', { name: sessionName || 'default' }),

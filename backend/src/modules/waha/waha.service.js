@@ -34,7 +34,9 @@ export class WahaService {
       const response = await this.axiosInstance.get('/api/sessions', {
         headers: this.getHeaders(),
       });
-      console.log('[WAHA] Sessions retrieved:', response.data?.length || 0, 'sessions');
+      console.log('[WAHA] Sessions response status:', response.status);
+      console.log('[WAHA] Sessions response data:', JSON.stringify(response.data));
+      console.log('[WAHA] Sessions retrieved:', Array.isArray(response.data) ? response.data.length : 'not-array', 'sessions');
       return response.data;
     } catch (error) {
       const status = error.response?.status || 500;

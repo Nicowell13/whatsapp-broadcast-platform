@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { User } from '../users/user.entity';
 
 @Entity('contacts')
 export class Contact {
@@ -19,6 +20,13 @@ export class Contact {
 
   @Column({ type: 'boolean', default: true })
   isActive;
+
+  @Column({ type: 'uuid', nullable: true })
+  userId;
+
+  @ManyToOne(() => User, (user) => user.id, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'userId' })
+  user;
 
   @CreateDateColumn()
   createdAt;

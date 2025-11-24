@@ -213,9 +213,9 @@ curl -X GET https://api.siripku.id/api/dashboard/stats \
 
 ### Step 1: Login sebagai Admin
 ```bash
-curl -X POST https://api.siripku.id/api/auth/login \
+curl -X POST https://api.watrix.online/api/auth/login \
   -H "Content-Type: application/json" \
-  -d "{\"email\":\"admin@example.com\",\"password\":\"admin123\"}"
+  -d '{"email":"admin@example.com","password":"admin123"}'
 ```
 
 Simpan token dari response, misalnya:
@@ -225,26 +225,37 @@ TOKEN="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxMjMiLCJlbWFpbCI6ImFk
 
 ### Step 2: Tambah User Baru
 ```bash
-curl -X POST https://api.siripku.id/api/auth/register \
+curl -X POST https://api.watrix.online/api/auth/register \
   -H "Content-Type: application/json" \
-  -d "{\"name\":\"Worker Baru\",\"email\":\"worker@example.com\",\"password\":\"worker123\"}"
+  -d '{"name":"Worker Baru","email":"worker@example.com","password":"worker123"}'
 ```
 
 ### Step 3: Lihat Daftar User
 ```bash
-curl -X GET https://api.siripku.id/api/users \
+curl -X GET https://api.watrix.online/api/users \
   -H "Authorization: Bearer $TOKEN"
 ```
 
-### Step 4: Hapus User (gunakan ID dari step 3)
+### Step 4: Import Contacts dari CSV
 ```bash
-curl -X DELETE https://api.siripku.id/api/users/uuid-worker-id \
+# Buat file contacts.csv terlebih dahulu dengan format:
+# name,phone,email
+# John Doe,628123456789,john@example.com
+
+curl -X POST https://api.watrix.online/api/contacts/import \
+  -H "Authorization: Bearer $TOKEN" \
+  -F "file=@contacts.csv"
+```
+
+### Step 5: Hapus User (gunakan ID dari step 3)
+```bash
+curl -X DELETE https://api.watrix.online/api/users/uuid-worker-id \
   -H "Authorization: Bearer $TOKEN"
 ```
 
-### Step 5: Cek Statistik Pesan
+### Step 6: Cek Statistik Pesan
 ```bash
-curl -X GET https://api.siripku.id/api/messages/stats \
+curl -X GET https://api.watrix.online/api/messages/stats \
   -H "Authorization: Bearer $TOKEN"
 ```
 

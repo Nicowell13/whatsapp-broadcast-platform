@@ -1,10 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useMutation } from 'react-query';
 import Layout from '@/components/Layout';
 import { wahaAPI } from '@/lib/api';
 import toast from 'react-hot-toast';
 import { Play } from 'lucide-react';
-import { useRouter } from 'next/router';
 
 // Modal QR besar
 function QRModal({ qr, onClose }) {
@@ -42,49 +41,15 @@ function QRModal({ qr, onClose }) {
 }
 
 export default function Sessions() {
-  const router = useRouter();
-
   const [isStarting, setIsStarting] = useState(false);
   const [qrModal, setQrModal] = useState(false);
   const [qrImg, setQrImg] = useState(null);
-  const [sessionStatus, setSessionStatus] = useState(null);
-
-  // --- CEK STATUS SESSION SECARA AKURAT ---
-  const fetchStatus = async () => {
-    try {
-      const res = await wahaAPI.getStatus('default');
-      setSessionStatus(res.data);
-    } catch (err) {
-      // Jika backend mengembalikan 404 → session belum ada atau tidak aktif
-      setSessionStatus({ state: 'disconnected', error: true });
-    }
-  };
-
-  useEffect(() => {
-    fetchStatus();
-    const interval = setInterval(fetchStatus, 3000);
-    return () => clearInterval(interval);
-  }, []);
-
-  // --- FIX: DETEKSI CONNECTED YANG BENAR ---
-  const isConnected = (() => {
-    if (!sessionStatus || !sessionStatus.state) return false;
-    const s = sessionStatus.state.toLowerCase();
-    return (
-      s.includes('open') ||
-      s.includes('connected') ||
-      s.includes('ready') ||
-      s.includes('authenticated') ||
-      s.includes('session')
-    );
-  })();
 
   // --- START SESSION ---
   const createMutation = useMutation(wahaAPI.createSession, {
     onSuccess: () => {
       toast.success('Default session started!');
       setIsStarting(false);
-      fetchStatus();
     },
     onError: (error) => {
       const message =
@@ -102,15 +67,14 @@ export default function Sessions() {
     createMutation.mutate('default');
   };
 
-  // --- QR MODAL ---
+  // --- SHOW QR ---
   const handleShowQR = async () => {
     setQrImg(null);
     setQrModal(true);
-
     try {
       const response = await wahaAPI.getQR();
       setQrImg(response.data?.qr || null);
-    } catch (e) {
+    } catch {
       setQrImg(null);
       toast.error('Gagal mengambil QR dari backend');
     }
@@ -126,57 +90,36 @@ export default function Sessions() {
 
         <div className="bg-white rounded-lg shadow p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-2">
-            Status Session WhatsApp
+            Start WhatsApp Session
           </h3>
 
-          <div className="mb-4">
-            <span
-              className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                isConnected
-                  ? 'bg-green-100 text-green-700'
-                  : 'bg-red-100 text-red-700'
-              }`}
-            >
-              {isConnected ? 'CONNECTED' : 'NOT CONNECTED'}
-            </span>
-          </div>
-
           <p className="text-sm text-gray-600 mb-4">
-            Gunakan tombol di bawah untuk memulai atau melihat QR.
+            Gunakan tombol di bawah untuk memulai session dan melihat QR untuk login WhatsApp.
           </p>
 
           <div className="flex flex-col gap-3">
 
-            {/* Tombol utama — otomatis berubah */}
+            {/* Tombol Start Session */}
             <button
-              onClick={
-                isConnected
-                  ? () => router.push('/dashboard')
-                  : handleStartDefault
-              }
+              onClick={handleStartDefault}
               disabled={isStarting}
               className="flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 w-full"
             >
               <Play className="mr-2 h-5 w-5" />
-              {isConnected
-                ? 'Kirim Pesan'
-                : isStarting
-                ? 'Starting default session...'
-                : 'Start / Restart default session'}
+              {isStarting ? 'Starting session...' : 'Start / Restart default session'}
             </button>
 
-            {/* QR muncul hanya jika belum connect */}
-            {!isConnected && (
-              <button
-                onClick={handleShowQR}
-                className="flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 w-full"
-              >
-                Lihat QR Code
-              </button>
-            )}
+            {/* Tombol QR */}
+            <button
+              onClick={handleShowQR}
+              className="flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 w-full"
+            >
+              Lihat QR Code
+            </button>
           </div>
         </div>
 
+        {/* Modal QR */}
         {qrModal && (
           <QRModal qr={qrImg} onClose={() => setQrModal(false)} />
         )}

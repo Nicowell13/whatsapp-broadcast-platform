@@ -56,13 +56,15 @@ export const messagesAPI = {
   getStats: () => api.get('/messages/stats'),
 };
 
-// WAHA API
+// WAHA API (single default session in free mode)
 export const wahaAPI = {
+  // Backend will emulate a single default session
   getSessions: () => api.get('/waha/sessions'),
-  createSession: (sessionName) => api.post('/waha/sessions', { name: sessionName }),
-  getQR: (sessionName) => api.get(`/waha/sessions/${sessionName}/qr`),
-  getStatus: (sessionName) => api.get(`/waha/sessions/${sessionName}/status`),
-  deleteSession: (sessionName) => api.delete(`/waha/sessions/${sessionName}`),
+  // If sessionName is empty, backend will use 'default'
+  createSession: (sessionName) => api.post('/waha/sessions', { name: sessionName || 'default' }),
+  getQR: (sessionName = 'default') => api.get(`/waha/sessions/${sessionName}/qr`),
+  getStatus: (sessionName = 'default') => api.get(`/waha/sessions/${sessionName}/status`),
+  deleteSession: (sessionName = 'default') => api.delete(`/waha/sessions/${sessionName}`),
 };
 
 // Dashboard API

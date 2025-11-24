@@ -30,19 +30,25 @@ export class WahaService {
 
   async getSessions() {
     try {
-      console.log('[WAHA] Getting sessions with headers:', this.getHeaders());
-      const response = await this.axiosInstance.get('/api/sessions', {
-        headers: this.getHeaders(),
-      });
-      console.log('[WAHA] Sessions response status:', response.status);
-      console.log('[WAHA] Sessions response data:', JSON.stringify(response.data));
-      console.log('[WAHA] Sessions retrieved:', Array.isArray(response.data) ? response.data.length : 'not-array', 'sessions');
-      return response.data;
+      // WAHA free: sessions list is not reliable and often empty.
+      // We emulate a single default session based on its status.
+      const status = await this.getSessionStatus('default').catch(() => null);
+
+      if (!status) {
+        return [];
+      }
+
+      return [
+        {
+          name: 'default',
+          status: status.state || status.status || 'UNKNOWN',
+          me: status.me || null,
+        },
+      ];
     } catch (error) {
-      const status = error.response?.status || 500;
+      const httpStatus = error.response?.status || 500;
       const data = error.response?.data;
-      console.error('[WAHA] getSessions error', { status, data, message: error.message });
-      throw new HttpException(data?.message || error.message, status);
+      throw new HttpException(data?.message || error.message, httpStatus);
     }
   }
 

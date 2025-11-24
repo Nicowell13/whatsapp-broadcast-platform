@@ -13,18 +13,14 @@ export default function Sessions() {
 
   const { data: sessionsResponse, isLoading, error } = useQuery('waha-sessions', wahaAPI.getSessions, {
     refetchInterval: 5000, // Auto refresh every 5s
-    onSuccess: (data) => {
-      console.log('Sessions response:', data);
-      console.log('Type:', typeof data);
-      console.log('Is array?', Array.isArray(data));
-      console.log('Has data property?', data?.data);
-    },
   });
 
-  // Handle both response formats: direct array or wrapped in data property
-  const sessions = Array.isArray(sessionsResponse) 
-    ? sessionsResponse 
-    : (Array.isArray(sessionsResponse?.data) ? sessionsResponse.data : []);
+  // Backend already normalizes to an array of sessions (single default session in free mode)
+  const sessions = Array.isArray(sessionsResponse?.data)
+    ? sessionsResponse.data
+    : Array.isArray(sessionsResponse)
+      ? sessionsResponse
+      : [];
 
   const createMutation = useMutation(wahaAPI.createSession, {
     onSuccess: () => {
@@ -48,7 +44,9 @@ export default function Sessions() {
 
   const handleCreate = (e) => {
     e.preventDefault();
-    createMutation.mutate(sessionName);
+    // For WAHA free, using 'default' is recommended
+    const nameToUse = sessionName || 'default';
+    createMutation.mutate(nameToUse);
   };
 
   const handleShowQR = async (name) => {

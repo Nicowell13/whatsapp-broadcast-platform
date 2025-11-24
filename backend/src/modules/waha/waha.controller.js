@@ -16,10 +16,8 @@ export class WahaController {
 
   @Post('sessions')
   async createSession(@Body() body) {
-    const sessionName = body.sessionName || body.name;
-    if (!sessionName) {
-      throw new BadRequestException('Provide `sessionName` or `name` in request body');
-    }
+    // For WAHA free, we always use a single default session
+    const sessionName = body.sessionName || body.name || 'default';
     return this.wahaService.createSession(sessionName);
   }
 

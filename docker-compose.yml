@@ -42,13 +42,30 @@ services:
     container_name: wa_waha_c1
     restart: unless-stopped
     environment:
-      WHATSAPP_HOOK_URL: http://backend:3000/api/webhooks/waha
-      WHATSAPP_HOOK_EVENTS: message,message.any,state.change,session.status
-      # Disable API key requirement - set to empty string or remove
-      WHATSAPP_API_KEY: ""
-      WAHA_DASHBOARD_ENABLED: "true"
+      # WAHA Configuration
+      WAHA_PRINT_QR: "True"
+      WHATSAPP_API_PORT: "3000"
+      WHATSAPP_API_HOSTNAME: "0.0.0.0"
+      
+      # Security - API Key (bisa dikosongkan atau set custom)
+      WHATSAPP_API_KEY: ${WAHA_API_KEY:-}
+      
+      # Session configuration
+      WHATSAPP_RESTART_ALL_SESSIONS: "False"
+      
+      # Engine (WEBJS recommended)
+      WHATSAPP_DEFAULT_ENGINE: "WEBJS"
+      
+      # Webhook configuration
+      WHATSAPP_HOOK_EVENTS: "message,message.any,state.change,session.status"
+      WHATSAPP_HOOK_URL: "http://backend:3000/api/webhooks/waha"
+      
+      # Files & Media
+      WHATSAPP_FILES_FOLDER: "/app/files"
+      WHATSAPP_FILES_LIFETIME: "180"
     volumes:
       - waha_data:/app/.sessions
+      - waha_files:/app/files
     networks:
       - wa_network
     deploy:
@@ -165,3 +182,4 @@ volumes:
   postgres_data:
   redis_data:
   waha_data:
+  waha_files:

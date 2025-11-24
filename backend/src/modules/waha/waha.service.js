@@ -61,6 +61,18 @@ export class WahaService {
         headers: this.getHeaders(),
       });
       console.log('[WAHA] Session created successfully:', sessionName);
+
+      // PATCH: langsung start session setelah create
+      try {
+        await this.axiosInstance.post(`/api/sessions/${sessionName}/start`, {}, {
+          headers: this.getHeaders(),
+        });
+        console.log('[WAHA] Session started:', sessionName);
+      } catch (startErr) {
+        console.error('[WAHA] Failed to start session after create', { sessionName, error: startErr.message });
+        // Tidak throw, biar tetap lanjut
+      }
+
       return response.data;
     } catch (error) {
       const status = error.response?.status || 500;
@@ -71,7 +83,6 @@ export class WahaService {
         data, 
         message: error.message 
       });
-      
       // If session already exists (422), provide helpful message
       if (status === 422 && data?.message?.includes('already exists')) {
         throw new HttpException(
@@ -79,7 +90,6 @@ export class WahaService {
           status
         );
       }
-      
       throw new HttpException(data?.message || error.message, status);
     }
   }

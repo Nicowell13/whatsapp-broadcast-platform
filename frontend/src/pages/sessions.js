@@ -5,7 +5,6 @@ import { wahaAPI } from '@/lib/api';
 import toast from 'react-hot-toast';
 import { Play } from 'lucide-react';
 
-// Modal QR besar
 function QRModal({ qr, onClose }) {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-70 backdrop-blur-sm flex items-center justify-center z-50">
@@ -18,12 +17,7 @@ function QRModal({ qr, onClose }) {
             src={qr}
             alt="QR Code"
             className="mx-auto mb-6"
-            style={{
-              width: '480px',
-              height: '480px',
-              maxWidth: '100%',
-              objectFit: 'contain',
-            }}
+            style={{ width: 480, height: 480, maxWidth: '100%', objectFit: 'contain' }}
           />
         ) : (
           <div className="text-gray-500 mb-6">QR tidak tersedia</div>
@@ -43,36 +37,43 @@ function QRModal({ qr, onClose }) {
 export default function Sessions() {
   const [qrModal, setQrModal] = useState(false);
   const [qrImg, setQrImg] = useState(null);
+  const [isStarting, setIsStarting] = useState(false);
 
-  // --- START DEFAULT SESSION ---
-  const createMutation = useMutation(
-    async () => {
-      await wahaAPI.startDefault(); // backend: POST /waha/session/start
+  // ===================================
+  // START DEFAULT SESSION
+  // ===================================
+  const startMutation = useMutation(async () => {
+    await wahaAPI.createSession();
+    return await wahaAPI.start();
+  }, {
+    onSuccess: () => {
+      toast.success('Default session started!');
+      setIsStarting(false);
     },
-    {
-      onSuccess: () => {
-        toast.success('Default session started!');
-      },
-      onError: (error) => {
-        const message =
-          error.response?.data?.message ||
-          error.message ||
-          'Failed to start session';
-        toast.error(message);
-      },
+    onError: (err) => {
+      const msg = err.response?.data?.message || err.message;
+      toast.error(msg);
+      setIsStarting(false);
     }
-  );
+  });
 
-  // --- SHOW QR ---
+  const handleStart = () => {
+    if (isStarting) return;
+    setIsStarting(true);
+    startMutation.mutate();
+  };
+
+  // ===================================
+  // SHOW QR
+  // ===================================
   const handleShowQR = async () => {
     setQrImg(null);
     setQrModal(true);
     try {
-      const response = await wahaAPI.getQR();
-      setQrImg(response.data?.qr || null);
+      const res = await wahaAPI.getQR();
+      setQrImg(res.data?.qr || null);
     } catch {
-      setQrImg(null);
-      toast.error('Gagal mengambil QR dari backend');
+      toast.error('Gagal mengambil QR');
     }
   };
 
@@ -90,21 +91,20 @@ export default function Sessions() {
           </h3>
 
           <p className="text-sm text-gray-600 mb-4">
-            Gunakan tombol di bawah untuk memulai session dan melihat QR untuk login WhatsApp.
+            Gunakan tombol di bawah untuk memulai session dan melihat QR untuk login.
           </p>
 
           <div className="flex flex-col gap-3">
 
-            {/* Start Session */}
             <button
-              onClick={() => createMutation.mutate()}
+              onClick={handleStart}
+              disabled={isStarting}
               className="flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 w-full"
             >
               <Play className="mr-2 h-5 w-5" />
-              Start / Restart default session
+              {isStarting ? 'Starting session...' : 'Start / Restart default session'}
             </button>
 
-            {/* QR Button */}
             <button
               onClick={handleShowQR}
               className="flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 w-full"
@@ -115,8 +115,9 @@ export default function Sessions() {
           </div>
         </div>
 
-        {/* Modal QR */}
-        {qrModal && <QRModal qr={qrImg} onClose={() => setQrModal(false)} />}
+        {qrModal && (
+          <QRModal qr={qrImg} onClose={() => setQrModal(false)} />
+        )}
 
       </div>
     </Layout>

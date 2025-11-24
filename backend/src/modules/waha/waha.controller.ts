@@ -17,39 +17,37 @@ export class WahaController {
   constructor(private readonly wahaService: WahaService) {}
 
   @Get('sessions')
-  async getSessions() {
+  async getSessions(): Promise<any> {
     return this.wahaService.getSessions();
   }
 
   @Post('sessions')
-  async createSession(@Body() body: any) {
+  async createSession(@Body() body: any): Promise<any> {
     const sessionName = body.sessionName || body.name || 'default';
-
     if (!sessionName) {
       throw new BadRequestException('sessionName is required');
     }
-
     return this.wahaService.createSession(sessionName);
   }
 
   @Get('sessions/:name/qr')
-  async getQR() {
+  async getQR(): Promise<any> {
     // tetap QR default
     return this.wahaService.getSessionQR();
   }
 
   @Get('sessions/:name/status')
-  async getStatus(@Param('name') name: string) {
+  async getStatus(@Param('name') name: string): Promise<any> {
     return this.wahaService.getSessionStatus(name);
   }
 
   @Delete('sessions/:name')
-  async deleteSession(@Param('name') name: string) {
+  async deleteSession(@Param('name') name: string): Promise<any> {
     return this.wahaService.deleteSession(name);
   }
 
   @Post('sessions/:name/logout')
-  async logout(@Param('name') name: string) {
+  async logout(@Param('name') name: string): Promise<any> {
     return this.wahaService.logoutSession(name);
   }
 }

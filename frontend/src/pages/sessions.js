@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 import { Play } from 'lucide-react';
 import { useRouter } from 'next/router';
 
-// Modal QR besar & jelas
+// Modal QR besar
 function QRModal({ qr, onClose }) {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-70 backdrop-blur-sm flex items-center justify-center z-50">
@@ -43,31 +43,41 @@ function QRModal({ qr, onClose }) {
 
 export default function Sessions() {
   const router = useRouter();
+
   const [isStarting, setIsStarting] = useState(false);
   const [qrModal, setQrModal] = useState(false);
   const [qrImg, setQrImg] = useState(null);
   const [sessionStatus, setSessionStatus] = useState(null);
 
-  // --- CEK STATUS SESSION ---
+  // --- CEK STATUS SESSION SECARA AKURAT ---
   const fetchStatus = async () => {
     try {
       const res = await wahaAPI.getStatus('default');
       setSessionStatus(res.data);
-    } catch {
-      setSessionStatus(null);
+    } catch (err) {
+      // Jika backend mengembalikan 404 → session belum ada atau tidak aktif
+      setSessionStatus({ state: 'disconnected', error: true });
     }
   };
 
   useEffect(() => {
     fetchStatus();
-    const interval = setInterval(fetchStatus, 3000); // cek tiap 3 detik
+    const interval = setInterval(fetchStatus, 3000);
     return () => clearInterval(interval);
   }, []);
 
-  const isConnected =
-    sessionStatus?.state?.toLowerCase().includes('open') ||
-    sessionStatus?.state?.toLowerCase().includes('connected') ||
-    sessionStatus?.state?.toLowerCase().includes('ready');
+  // --- FIX: DETEKSI CONNECTED YANG BENAR ---
+  const isConnected = (() => {
+    if (!sessionStatus || !sessionStatus.state) return false;
+    const s = sessionStatus.state.toLowerCase();
+    return (
+      s.includes('open') ||
+      s.includes('connected') ||
+      s.includes('ready') ||
+      s.includes('authenticated') ||
+      s.includes('session')
+    );
+  })();
 
   // --- START SESSION ---
   const createMutation = useMutation(wahaAPI.createSession, {
@@ -92,14 +102,15 @@ export default function Sessions() {
     createMutation.mutate('default');
   };
 
-  // --- SHOW QR ---
+  // --- QR MODAL ---
   const handleShowQR = async () => {
     setQrImg(null);
     setQrModal(true);
+
     try {
       const response = await wahaAPI.getQR();
       setQrImg(response.data?.qr || null);
-    } catch {
+    } catch (e) {
       setQrImg(null);
       toast.error('Gagal mengambil QR dari backend');
     }
@@ -136,11 +147,11 @@ export default function Sessions() {
 
           <div className="flex flex-col gap-3">
 
-            {/* Tombol utama — berubah otomatis */}
+            {/* Tombol utama — otomatis berubah */}
             <button
               onClick={
                 isConnected
-                  ? () => router.push('/kirim') // arahkan ke halaman kirim pesan
+                  ? () => router.push('/dashboard')
                   : handleStartDefault
               }
               disabled={isStarting}
@@ -154,7 +165,7 @@ export default function Sessions() {
                 : 'Start / Restart default session'}
             </button>
 
-            {/* Tombol QR — otomatis hilang jika sudah connect */}
+            {/* QR muncul hanya jika belum connect */}
             {!isConnected && (
               <button
                 onClick={handleShowQR}
@@ -166,9 +177,9 @@ export default function Sessions() {
           </div>
         </div>
 
-        {/* Modal QR */}
-        {qrModal && <QRModal qr={qrImg} onClose={() => setQrModal(false)} />}
-
+        {qrModal && (
+          <QRModal qr={qrImg} onClose={() => setQrModal(false)} />
+        )}
       </div>
     </Layout>
   );

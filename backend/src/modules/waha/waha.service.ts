@@ -1,4 +1,4 @@
-// waha.service.ts FINAL (Single Session Mode)
+// waha.service.ts - DEFAULT SESSION ONLY (FINAL)
 import { Injectable, HttpException } from '@nestjs/common';
 import axios from 'axios';
 
@@ -6,50 +6,71 @@ import axios from 'axios';
 export class WahaService {
   private wahaUrl: string;
   private apiKey: string;
-  private axios: any;
+  private axiosInstance: any;
 
   constructor() {
     this.wahaUrl = process.env.WAHA_API_URL || 'http://localhost:3000';
     this.apiKey = process.env.WAHA_API_KEY || '';
-    this.axios = axios.create({
+    this.axiosInstance = axios.create({
       baseURL: this.wahaUrl,
       headers: this.apiKey ? { 'X-Api-Key': this.apiKey } : {},
       timeout: 30000,
     });
   }
 
-  async startSession() {
+  async createDefaultSession() {
     try {
-      const res = await this.axios.post('/api/sessions/start');
+      const res = await this.axiosInstance.post('/api/sessions/default');
       return res.data;
-    } catch (err:any) { throw new HttpException(err.response?.data || err.message, err.response?.status || 500); }
+    } catch (err:any) {
+      throw new HttpException(err.response?.data || err.message, err.response?.status || 500);
+    }
   }
 
-  async createSession() {
+  async startDefaultSession() {
     try {
-      const res = await this.axios.post('/api/sessions');
+      const res = await this.axiosInstance.post('/api/sessions/default/start');
       return res.data;
-    } catch (err:any) { throw new HttpException(err.response?.data || err.message, err.response?.status || 500); }
+    } catch (err:any) {
+      throw new HttpException(err.response?.data || err.message, err.response?.status || 500);
+    }
   }
 
-  async deleteSession() {
+  async deleteDefaultSession() {
     try {
-      const res = await this.axios.delete('/api/sessions');
+      const res = await this.axiosInstance.delete('/api/sessions/default');
       return res.data;
-    } catch (err:any) { throw new HttpException(err.response?.data || err.message, err.response?.status || 500); }
+    } catch (err:any) {
+      throw new HttpException(err.response?.data || err.message, err.response?.status || 500);
+    }
   }
 
-  async getStatus() {
+  async getDefaultStatus() {
     try {
-      const res = await this.axios.get('/api/sessions/status');
+      const res = await this.axiosInstance.get('/api/sessions/default/status');
       return res.data;
-    } catch { return { state: 'disconnected', error: true }; }
+    } catch {
+      return { state: 'disconnected', error: true };
+    }
   }
 
-  async getQR() {
+  async logoutDefault() {
     try {
-      const res = await this.axios.get('/api/screenshot', { responseType: 'text' });
+      const res = await this.axiosInstance.post('/api/sessions/default/logout');
+      return res.data;
+    } catch (err:any) {
+      throw new HttpException(err.response?.data || err.message, err.response?.status || 500);
+    }
+  }
+
+  async getDefaultQR() {
+    try {
+      const res = await this.axiosInstance.get('/api/screenshot?session=default', {
+        responseType: 'text',
+      });
       return { qr: res.data };
-    } catch { return { qr: null }; }
+    } catch {
+      return { qr: null };
+    }
   }
 }

@@ -25,7 +25,8 @@ export default function Layout({ children }) {
     { name: 'Contacts', href: '/contacts', icon: Users },
     { name: 'Messages', href: '/messages', icon: MessageSquare },
     { name: 'WhatsApp Sessions', href: '/sessions', icon: Settings },
-    { name: 'Admin Users', href: '/admin/users', icon: UserCog, admin: true },
+    { name: 'Show QR', href: '/qr', icon: Settings },
+  
   ];
 
   if (!token) return null;

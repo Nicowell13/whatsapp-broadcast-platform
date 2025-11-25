@@ -3,6 +3,8 @@ import { BullModule } from '@nestjs/bull';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Message } from '../messages/message.entity';
 import { QueueService } from './queue.service';
+import { WahaProcessor } from './waha.processor';
+import { MessagesService } from '../messages/messages.service';
 
 @Module({
   imports: [
@@ -11,7 +13,7 @@ import { QueueService } from './queue.service';
     }),
     TypeOrmModule.forFeature([Message]),
   ],
-  providers: [QueueService],
+  providers: [QueueService, WahaProcessor, MessagesService],
   exports: [QueueService],
 })
 export class QueueModule {}

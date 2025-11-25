@@ -5,22 +5,31 @@ import { wahaAPI } from '@/lib/api';
 import toast from 'react-hot-toast';
 import { Play } from 'lucide-react';
 
-function QRModal({ qr, onClose }) {
+function QRModal({ onClose }) {
+  const [qr, setQr] = useState(null);
+
+  useEffect(() => {
+    const evt = new EventSource('/session/qr-stream');
+
+    evt.onmessage = (msg) => {
+      const data = JSON.parse(msg.data);
+      setQr(data?.qr || null);
+    };
+
+    evt.onerror = () => console.log("QR stream error");
+
+    return () => evt.close();
+  }, []);
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-70 backdrop-blur-sm flex items-center justify-center z-50">
       <div className="bg-white rounded-xl p-6 shadow-xl w-full max-w-lg text-center">
-
         <h2 className="text-2xl font-bold mb-6 text-gray-900">Scan QR Code WhatsApp</h2>
 
         {qr ? (
-          <img
-            src={qr}
-            alt="QR Code"
-            className="mx-auto mb-6"
-            style={{ width: 480, height: 480, maxWidth: '100%', objectFit: 'contain' }}
-          />
+          <img src={qr} alt="QR Code" className="mx-auto mb-6" style={{ width: 480, height: 480 }} />
         ) : (
-          <div className="text-gray-500 mb-6">QR tidak tersedia</div>
+          <div className="text-gray-500 mb-6">Menunggu QR...</div>
         )}
 
         <button
@@ -36,31 +45,20 @@ function QRModal({ qr, onClose }) {
 
 export default function Sessions() {
   const [qrModal, setQrModal] = useState(false);
-  const [qrImg, setQrImg] = useState(null);
   const [isStarting, setIsStarting] = useState(false);
 
-  // ===================================
-  // START DEFAULT SESSION
-  // ===================================
   const startMutation = useMutation(
     async () => {
-      // 1. Create session
-      await wahaAPI.createSession();
-
-      // 2. Start session
-      return await wahaAPI.start();
+      return await wahaAPI.startSession();
     },
     {
       onSuccess: async () => {
         toast.success('Default session dimulai!');
         setIsStarting(false);
-
-        // 3. Buka QR otomatis
-        await handleShowQR();
+        setQrModal(true);
       },
       onError: (err) => {
-        const msg = err?.response?.data?.message || err.message || 'Gagal memulai session';
-        toast.error(msg);
+        toast.error(err?.response?.data?.message || err.message);
         setIsStarting(false);
       },
     }
@@ -72,30 +70,15 @@ export default function Sessions() {
     startMutation.mutate();
   };
 
-  // ===================================
-  // SHOW QR
-  // ===================================
-  const handleShowQR = async () => {
-    setQrImg(null);
-    setQrModal(true);
-
-    try {
-      const res = await wahaAPI.getQR();
-      setQrImg(res?.data?.qr || null);
-    } catch {
-      toast.error('Gagal mengambil QR');
-    }
-  };
-
   return (
     <Layout>
       <div className="space-y-6">
-
         <h1 className="text-3xl font-bold text-gray-900">
           WhatsApp Session (Default)
         </h1>
 
         <div className="bg-white rounded-lg shadow p-6">
+
           <h3 className="text-lg font-semibold text-gray-900 mb-2">
             Start WhatsApp Session
           </h3>
@@ -104,31 +87,25 @@ export default function Sessions() {
             Klik tombol untuk memulai session dan menampilkan QR WhatsApp untuk login.
           </p>
 
-          <div className="flex flex-col gap-3">
+          <button
+            onClick={handleStart}
+            disabled={isStarting}
+            className="flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 w-full"
+          >
+            <Play className="mr-2 h-5 w-5" />
+            {isStarting ? 'Memulai session...' : 'Start / Restart Default Session'}
+          </button>
 
-            <button
-              onClick={handleStart}
-              disabled={isStarting}
-              className="flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 w-full"
-            >
-              <Play className="mr-2 h-5 w-5" />
-              {isStarting ? 'Memulai session...' : 'Start / Restart Default Session'}
-            </button>
+          <button
+            onClick={() => setQrModal(true)}
+            className="mt-3 flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 w-full"
+          >
+            Lihat QR Code
+          </button>
 
-            <button
-              onClick={handleShowQR}
-              className="flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 w-full"
-            >
-              Lihat QR Code
-            </button>
-
-          </div>
         </div>
 
-        {qrModal && (
-          <QRModal qr={qrImg} onClose={() => setQrModal(false)} />
-        )}
-
+        {qrModal && <QRModal onClose={() => setQrModal(false)} />}
       </div>
     </Layout>
   );

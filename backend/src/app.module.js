@@ -13,6 +13,8 @@ import { WebhooksModule } from './modules/webhooks/webhooks.module';
 import { QueueModule } from './modules/queue/queue.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { CleanupModule } from './modules/cleanup/cleanup.module';
+import { SessionModule } from './modules/session/session.module';
+
 
 @Module({
   imports: [
@@ -40,7 +42,7 @@ import { CleanupModule } from './modules/cleanup/cleanup.module';
     // Redis Queue
     BullModule.forRoot({
       redis: {
-        host: process.env.REDIS_HOST || 'localhost',
+        host: process.env.REDIS_HOST || 'redis',
         port: parseInt(process.env.REDIS_PORT) || 6379,
       },
     }),
@@ -56,6 +58,7 @@ import { CleanupModule } from './modules/cleanup/cleanup.module';
     QueueModule,
     DashboardModule,
     CleanupModule,
+    SessionModule,
   ],
 })
 export class AppModule {}

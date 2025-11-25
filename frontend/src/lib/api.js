@@ -78,8 +78,9 @@ export const wahaAPI = {
   start: () => api.post('/waha/sessions/default/start'),
   getQR: () => api.get('/waha/sessions/default/qr'),
   status: () => api.get('/waha/sessions/default/status'),
-  delete: () => api.delete('/waha/sessions/default'),
+  delete: () => api.post('/waha/sessions/default/delete'),
 };
+
 
 
 /* ======================================

@@ -1,34 +1,56 @@
-import { Controller, Get, Post, Delete, UseGuards } from '@nestjs/common';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { Controller, Get, Post, Body, Param } from '@nestjs/common';
 import { WahaService } from './waha.service';
 
 @Controller('waha')
-@UseGuards(JwtAuthGuard)
 export class WahaController {
   constructor(private readonly wahaService: WahaService) {}
 
-  // ============================================================
-  // DEFAULT SESSION ONLY
-  // ============================================================
+@Get('sessions/:name/qr')
+async getQR(@Param('name') name: string) {
+  return this.wahaService.getQR(name);
+}
 
-  @Post('session/start')
+@Get('sessions/:name/status')
+async getStatus(@Param('name') name: string) {
+  return this.wahaService.getStatus(name);
+}
+
+
+  @Get('health')
+  async health() {
+    return this.wahaService.checkHealth();
+  }
+
+  @Get('sessions')
+  async sessions() {
+    return this.wahaService.getSessions();
+  }
+
+  @Post('sessions')
+  async createSession(@Body() body: { name: string; config?: Record<string, any> }) {
+    const name = body?.name || 'default';
+    const config = body?.config || {};
+    return this.wahaService.createSession(name, config);
+  }
+
+  @Post('sessions/:name/start')
+  async startSession(@Param('name') name: string) {
+    return this.wahaService.startSession(name);
+  }
+
+  @Post('sessions/start-default')
   async startDefault() {
-    await this.wahaService.createDefaultSession();
     return this.wahaService.startDefaultSession();
   }
 
-  @Get('session/status')
-  async getStatus() {
-    return this.wahaService.getDefaultStatus();
+  @Post('sessions/:name/logout')
+  async logout(@Param('name') name: string) {
+    return this.wahaService.logoutSession(name);
   }
 
-  @Get('session/qr')
-  async getQR() {
-    return this.wahaService.getDefaultQR();
-  }
-
-  @Delete('session')
-  async deleteDefault() {
-    return this.wahaService.deleteDefaultSession();
+  @Post('sessions/:name/delete')
+  async delete(@Param('name') name: string) {
+    return this.wahaService.deleteSession(name);
   }
 }
+

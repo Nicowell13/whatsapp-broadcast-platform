@@ -42,20 +42,29 @@ export default function Sessions() {
   // ===================================
   // START DEFAULT SESSION
   // ===================================
-  const startMutation = useMutation(async () => {
-    await wahaAPI.createSession();
-    return await wahaAPI.start();
-  }, {
-    onSuccess: () => {
-      toast.success('Default session started!');
-      setIsStarting(false);
+  const startMutation = useMutation(
+    async () => {
+      // 1. Create session
+      await wahaAPI.createSession();
+
+      // 2. Start session
+      return await wahaAPI.start();
     },
-    onError: (err) => {
-      const msg = err.response?.data?.message || err.message;
-      toast.error(msg);
-      setIsStarting(false);
+    {
+      onSuccess: async () => {
+        toast.success('Default session dimulai!');
+        setIsStarting(false);
+
+        // 3. Buka QR otomatis
+        await handleShowQR();
+      },
+      onError: (err) => {
+        const msg = err?.response?.data?.message || err.message || 'Gagal memulai session';
+        toast.error(msg);
+        setIsStarting(false);
+      },
     }
-  });
+  );
 
   const handleStart = () => {
     if (isStarting) return;
@@ -69,9 +78,10 @@ export default function Sessions() {
   const handleShowQR = async () => {
     setQrImg(null);
     setQrModal(true);
+
     try {
       const res = await wahaAPI.getQR();
-      setQrImg(res.data?.qr || null);
+      setQrImg(res?.data?.qr || null);
     } catch {
       toast.error('Gagal mengambil QR');
     }
@@ -91,7 +101,7 @@ export default function Sessions() {
           </h3>
 
           <p className="text-sm text-gray-600 mb-4">
-            Gunakan tombol di bawah untuk memulai session dan melihat QR untuk login.
+            Klik tombol untuk memulai session dan menampilkan QR WhatsApp untuk login.
           </p>
 
           <div className="flex flex-col gap-3">
@@ -102,7 +112,7 @@ export default function Sessions() {
               className="flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 w-full"
             >
               <Play className="mr-2 h-5 w-5" />
-              {isStarting ? 'Starting session...' : 'Start / Restart default session'}
+              {isStarting ? 'Memulai session...' : 'Start / Restart Default Session'}
             </button>
 
             <button

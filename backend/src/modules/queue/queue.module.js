@@ -6,13 +6,12 @@ import { MessagesModule } from '../messages/messages.module';
 
 @Module({
   imports: [
-    BullModule.registerQueue({ name: 'messages' }),
-    MessagesModule,  // ← WAJIB
+    BullModule.registerQueue({
+      name: 'messages',
+    }),
+    MessagesModule, // WAJIB agar WahaProcessor bisa inject MessagesService
   ],
-  providers: [
-    QueueService,
-    WahaProcessor,
-  ],
+  providers: [QueueService, WahaProcessor],
   exports: [QueueService],
 })
 export class QueueModule {}
